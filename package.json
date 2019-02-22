@@ -1,20 +1,28 @@
 {
-  "name": "netlify-functions-hello-world",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/isthatcentered/netlify-functions-hello-world.git"
-  },
-  "keywords": [],
-  "author": "Edouard Penin <e.peninb@gmail.com>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/isthatcentered/netlify-functions-hello-world/issues"
-  },
-  "homepage": "https://github.com/isthatcentered/netlify-functions-hello-world#readme"
+    "name": "netlify-functions-hello-world",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "function": "yarn netlify-lambda serve functions"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/isthatcentered/netlify-functions-hello-world.git"
+    },
+    "keywords": [],
+    "author": "Edouard Penin <e.peninb@gmail.com>",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/isthatcentered/netlify-functions-hello-world/issues"
+    },
+    "homepage": "https://github.com/isthatcentered/netlify-functions-hello-world#readme",
+    "devDependencies": {
+        "@types/axios": "^0.14.0",
+        "axios": "^0.18.0",
+        "netlify-lambda": "^1.4.2"
+    },
+    "dependencies": {
+    }
 }
