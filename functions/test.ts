@@ -59,7 +59,20 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 			"Content-Type": "application/json",
 		},
 		statusCode: 200,
-		body:       JSON.stringify( { blocks: [ imageBlock ] } ),
+		body:       JSON.stringify( {
+			blocks: [
+				{
+					"type":      "image",
+					"title":     {
+						"type":  "plain_text",
+						"text":  "image1",
+						"emoji": true,
+					},
+					"image_url": "https://api.slack.com/img/blocks/bkb_template_images/beagle.png",
+					"alt_text":  "image1",
+				},
+			],
+		} ),
 	} )
 }
 
