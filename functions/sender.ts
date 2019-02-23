@@ -1,7 +1,6 @@
-import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda"
-import { parse } from "query-string"
-import { WebClient } from "@slack/client"
+import { APIGatewayEvent, Callback, Context } from "aws-lambda"
 import { config } from "dotenv"
+import { parse } from "query-string"
 
 
 
@@ -19,138 +18,170 @@ interface Response
 }
 
 
-interface MessageActionRequest
-{
-	payload: string
+const handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
+	
+	console.log( "EVENT:::", event )
+	
+	const payload = parse( event.body || "" ) as any
+	
+	console.log( payload )
+	
+	// Is it dialog trigger
+	// -> Send back dialog config
+	//    -> Tool checkbox
+	//    -> Mail
+	//    -> Team name
+	
+	
+	// Is it dialog cancellation
+	// -> Don't do shit
+	
+	// Is it dialog submit
+	// -> send dm
+	//    -> "Hey dude, your account has bee created"
+	//    -> gif
+	
+	
+	return Promise.resolve( {
+		statusCode: 200,
+	} )
 }
 
-export interface MessageActionRequestPayload
-{
-	type: string
-	token: string
-	action_ts: string
-	team: {
-		domain: string
-		id: string
-	}
-	user: {
-		name: string
-		id: string
-	}
-	channel: {
-		name: string
-		id: string
-	}
-	callback_id: string
-	trigger_id: string
-	message_ts: string
-	message: {
-		client_msg_id?: string
-		text: string
-		type: string
-		user?: string
-		ts: string
-		username?: string
-		subtype?: string
-		bot_id?: string
-	}
-	response_url: string
-}
 
-const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
-	
-	
-	const params                               = event.queryStringParameters,
-	      { payload }: MessageActionRequest    = parse( event.body || "" ) as any,
-	      message: MessageActionRequestPayload = JSON.parse( payload )
-	
-	console.log( "////////////////////////////////////////" )
-	console.log( "PARSED", message )
-	console.log( "////////////////////////////////////////" )
-	
-	const web = new WebClient( process.env.SLACK_TOKEN )
-	
-	
-	return web.auth
-		.test()
-		.then( ( res: any ) => {
-			return res.user_id // Find your user id to know where to send messages to
-		} )
-		.then( id => {
-			console.log( "*********************************************" )
-			console.log( "PAYLOAD:::", message.trigger_id )
-			console.log( "*********************************************" )
-			
-			const promises = [
-				web.chat.postMessage( {
-					channel: "CGEU070CA",
-					text:    `The current time is... now ? 🤷‍♂️`,
-				} ),
-				web.dialog.open( {
-					trigger_id: message.trigger_id,
-					dialog:     {
-						callback_id:      "ryde-46e2b0",
-						title:            `Create account`,
-						submit_label:     "Request",
-						notify_on_cancel: true,
-						state:            "Limo",
-						elements:         [
-							{
-								label:   "Tools",
-								type:    "select",
-								name:    "meal_preferences",
-								options: [
-									{
-										label: "Github",
-										value: "hindu",
-									},
-									{
-										label: "Gitlab",
-										value: "vegan",
-									},
-									{
-										label: "Artifactory",
-										value: "kosher",
-									},
-									{
-										label: "Vault",
-										value: "burrito",
-									},
-								],
-							},
-							{
-								type:  "text",
-								label: "Team name",
-								name:  "loc_origin",
-							},
-						],
-					},
-				} ),
-			]
-			return Promise.all( promises )
-		} )
-		.then( () =>
-			({
-				headers:    {
-					"Content-Type": "application/json",
-				},
-				statusCode: 200,
-				body:       JSON.stringify( {
-					message: "Hello 😍",
-				} ),
-			}) )
-		.catch( err => {
-			
-			console.log( err )
-			return ({
-				headers:    {
-					"Content-Type": "application/json",
-				},
-				statusCode: 500,
-				body:       JSON.stringify( err ),
-			})
-		} )
-}
+
+//
+// interface MessageActionRequest
+// {
+// 	payload: string
+// }
+//
+// export interface MessageActionRequestPayload
+// {
+// 	type: string
+// 	token: string
+// 	action_ts: string
+// 	team: {
+// 		domain: string
+// 		id: string
+// 	}
+// 	user: {
+// 		name: string
+// 		id: string
+// 	}
+// 	channel: {
+// 		name: string
+// 		id: string
+// 	}
+// 	callback_id: string
+// 	trigger_id: string
+// 	message_ts: string
+// 	message: {
+// 		client_msg_id?: string
+// 		text: string
+// 		type: string
+// 		user?: string
+// 		ts: string
+// 		username?: string
+// 		subtype?: string
+// 		bot_id?: string
+// 	}
+// 	response_url: string
+// }
+//
+// const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
+//
+//
+// 	const params                               = event.queryStringParameters,
+// 	      { payload }: MessageActionRequest    = parse( event.body || "" ) as any,
+// 	      message: MessageActionRequestPayload = JSON.parse( payload )
+//
+// 	console.log( "////////////////////////////////////////" )
+// 	console.log( "PARSED", message )
+// 	console.log( "////////////////////////////////////////" )
+//
+// 	const web = new WebClient( process.env.SLACK_TOKEN )
+//
+//
+// 	return web.auth
+// 		.test()
+// 		.then( ( res: any ) => {
+// 			return res.user_id // Find your user id to know where to send messages to
+// 		} )
+// 		.then( id => {
+// 			console.log( "*********************************************" )
+// 			console.log( "PAYLOAD:::", message.trigger_id )
+// 			console.log( "*********************************************" )
+//
+// 			const promises = [
+// 				web.chat.postMessage( {
+// 					channel: "CGEU070CA",
+// 					text:    `The current time is... now ? 🤷‍♂️`,
+// 				} ),
+// 				web.dialog.open( {
+// 					trigger_id: message.trigger_id,
+// 					dialog:     {
+// 						callback_id:      "ryde-46e2b0",
+// 						title:            `Create account`,
+// 						submit_label:     "Request",
+// 						notify_on_cancel: true,
+// 						state:            "Limo",
+// 						elements:         [
+// 							{
+// 								label:   "Tools",
+// 								type:    "select",
+// 								name:    "meal_preferences",
+// 								options: [
+// 									{
+// 										label: "Github",
+// 										value: "hindu",
+// 									},
+// 									{
+// 										label: "Gitlab",
+// 										value: "vegan",
+// 									},
+// 									{
+// 										label: "Artifactory",
+// 										value: "kosher",
+// 									},
+// 									{
+// 										label: "Vault",
+// 										value: "burrito",
+// 									},
+// 								],
+// 							},
+// 							{
+// 								type:  "text",
+// 								label: "Team name",
+// 								name:  "loc_origin",
+// 							},
+// 						],
+// 					},
+// 				} ),
+// 			]
+// 			return Promise.all( promises )
+// 		} )
+// 		.then( () =>
+// 			({
+// 				headers:    {
+// 					"Content-Type": "application/json",
+// 				},
+// 				statusCode: 200,
+// 				body:       JSON.stringify( {
+// 					message: "Hello 😍",
+// 				} ),
+// 			}) )
+// 		.catch( err => {
+//
+// 			console.log( err )
+// 			return ({
+// 				headers:    {
+// 					"Content-Type": "application/json",
+// 				},
+// 				statusCode: 500,
+// 				body:       JSON.stringify( err ),
+// 			})
+// 		} )
+// }
 
 // const payload: MessageActionRequest = {
 // 	payload: {
