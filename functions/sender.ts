@@ -73,7 +73,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 		.then( id => {
 			
 			console.log( "TRIGGER:::", body.payload.trigger_id )
-			console.log( "BODY_IN:::", body )
+			console.log( "BODY_IN:::", body.payload )
 			
 			const promises = [
 				web.chat.postMessage( {
