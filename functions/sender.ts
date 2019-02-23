@@ -73,7 +73,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 		.then( id => {
 			
 			console.log( "TRIGGER:::", body.payload.trigger_id )
-			console.log( "BODY_IN:::", body.payload )
+			console.log( "BODY_IN:::", (body.payload as any).triggerId )
 			
 			const promises = [
 				web.chat.postMessage( {
@@ -191,5 +191,32 @@ const payload2: MessageActionRequest = {
 	},
 }
 
+
+let t = {
+	"type":            "message_action",
+	"token":           "KmDISxAGBBgfNVS3f12ILd2a",
+	"action_ts":       "1550929511.785663",
+	"team":            {
+		"id":     "TGGBAA4DU",
+		"domain": "isthatcenteredgroup",
+	},
+	"user":            {
+		"id":   "UGESQ31C4",
+		"name": "e.peninb",
+	},
+	"channel":         {
+		"id":   "CGEU070CA",
+		"name": "factory",
+	},
+	"callback_id":     "account_new",
+	"trigger_id":      "558887688883.560384344470.08cd32f99f38b9ebebe91c6a442521bf",
+	"message_ts":      "1550928756.001700",
+	"message":         {
+		"client_msg_id": "e131f68f-dd54-4375-8945-4006040322c3",
+		"type":          "message",
+		"text":          "kuh",
+		"user":          "UGESQ31C4", "ts": "1550928756.001700",
+	}, "response_url": "https:\/\/hooks.slack.com\/app\/TGGBAA4DU\/558965632324\/qW5tATN8hOSjOMdoUB9pHovJ",
+}
 
 export { handler }
