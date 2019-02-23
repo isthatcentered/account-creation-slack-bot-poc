@@ -110,14 +110,17 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 					message: "Hello 😍",
 				} ),
 			}) )
-		.catch( err =>
-			({
+		.catch( err => {
+			
+			console.log( err )
+			return ({
 				headers:    {
 					"Content-Type": "application/json",
 				},
 				statusCode: 500,
 				body:       JSON.stringify( err ),
-			}) )
+			})
+		} )
 }
 
 const payload: MessageActionRequest = {
