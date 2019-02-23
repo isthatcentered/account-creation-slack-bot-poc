@@ -24,8 +24,10 @@
         "@babel/preset-typescript": "^7.3.3",
         "@types/aws-lambda": "^8.10.19",
         "@types/axios": "^0.14.0",
+        "@types/query-string": "^6.2.0",
         "axios": "^0.18.0",
-        "netlify-lambda": "^1.4.2"
+        "netlify-lambda": "^1.4.2",
+        "query-string": "^6.2.0"
     },
     "dependencies": {}
 }

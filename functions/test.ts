@@ -2,82 +2,65 @@
 // https://github.com/sw-yx/create-react-app-lambda-typescript/blob/master/src/lambda/hello.ts
 // https://www.netlify.com/docs/cli/#unbundled-javascript-function-deploys
 
-// const axios = require( "axios" )
-//
-// // deploys to {whatever}.netlify.com/.netlify/functions/test
-//
-// exports.handler = async ( event, context, callback ) => {
-//
-// 	console.log( "EVENT:::", event )
-// 	console.log( "CONTEXT:::", context )
-//
-// 	try {
-//
-// 		const data = await axios( "https://api.chucknorris.io/jokes/random" )
-// 			.then( res => res.data )
-//
-// 		return {
-// 			statusCode: 200,
-// 			headers: { "Content-Type": "application/json" },
-// 			body: JSON.stringify( data ),
-// 		}
-// 	} catch ( e ) {
-//
-// 		return {
-// 			statusCode: 500,
-// 			headers: { "Content-Type": "application/json" },
-// 			body: JSON.stringify( e ),
-// 		}
-// 	}
-// }
-
 import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda"
+import { parse } from "query-string"
 
 
 
-// token=ofejdTf2assfTdvTYIwl88za
-// team_id=T4R6RCZFA
-// team_domain=adeo-tech-community
-// channel_id=GG4HB63KM
-// channel_name=privategroup
-// user_id=UDVSGT3EW
-// user_name=edouard.penin
-// command=%2Fcongrats
-// text=
-// response_url=https%3A%2F%2Fhooks.slack.com%2Fcommands%2FT4R6RCZFA%2F558793207363%2FO0Rkh7ewtb1gz8QYjhvelzps
-// trigger_id=558167186192.161229441520.3b717ebc8cf4d8d2aa2e0bdc2d930596
 
-interface SlachCommandBody
+export type Maybe<T> = T | null | undefined
+
+interface SlachCommand
 {
-
+	team_id: string
+	team_domain: string
+	channel_id: string
+	channel_name: string
+	user_id: string
+	user_name: string
+	command: string
+	text: Maybe<string>
+	response_url: string
+	trigger_id: string
 }
 
-interface HelloResponse
+interface Response
 {
+	headers: { [ key: string ]: string }
 	statusCode: number
 	body: string
 }
 
-const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ) => {
+interface ImageBlock
+{
+	type: "image", // The type of block. For an image block, type is always image.
+	image_url: string, // 	The URL of the image to be displayed.
+	title?: {
+		type: "plain_text",
+		text: string
+	},
+	block_id?: string,
+	alt_text?: string // A plain-text summary of the image. This should not contain any markup.
+}
+
+const congrats = [ "https://media.giphy.com/media/g9582DNuQppxC/giphy.gif", "https://media.giphy.com/media/3oriO75X3EdbWwBqIo/giphy.gif", "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif" ]
+const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
 	
-	const params = event.queryStringParameters,
-	      body   = event.body
+	const params             = event.queryStringParameters,
+	      body: SlachCommand = parse( event.body || "" ) as any
 	
-	
-	console.log( "BODY:::", body )
-	console.log( "PARAMS:::", params )
-	console.log( event )
-	
-	
-	const response: HelloResponse = {
-		statusCode: 200,
-		body:       JSON.stringify( {
-			msg: `Hello world ${Math.floor( Math.random() * 10 )}`,
-			params,
-		} ),
+	const imageBlock: ImageBlock = {
+		type:      "image",
+		image_url: "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
 	}
 	
-	callback( undefined, response )
+	return Promise.resolve( {
+		headers:    {
+			"Content-Type": "application/json",
+		},
+		statusCode: 200,
+		body:       JSON.stringify( imageBlock ),
+	} )
 }
 
 export { handler }
