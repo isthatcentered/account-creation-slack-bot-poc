@@ -35,9 +35,10 @@ interface ImageBlock
 {
 	type: "image", // The type of block. For an image block, type is always image.
 	image_url: string, // 	The URL of the image to be displayed.
-	title?: {
+	title: {
 		type: "plain_text",
 		text: string
+		emoji: boolean
 	},
 	block_id?: string,
 	alt_text?: string // A plain-text summary of the image. This should not contain any markup.
@@ -50,8 +51,14 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	      body: SlachCommand = parse( event.body || "" ) as any
 	
 	const imageBlock: ImageBlock = {
-		type:      "image",
-		image_url: "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
+		"type":      "image",
+		"title":     {
+			"type":  "plain_text",
+			"text":  "image1",
+			"emoji": true,
+		},
+		"image_url": "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
+		"alt_text":  "image1",
 	}
 	
 	return Promise.resolve( {
@@ -61,16 +68,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 		statusCode: 200,
 		body:       JSON.stringify( {
 			blocks: [
-				{
-					"type":      "image",
-					"title":     {
-						"type":  "plain_text",
-						"text":  "image1",
-						"emoji": true,
-					},
-					"image_url": "https://api.slack.com/img/blocks/bkb_template_images/beagle.png",
-					"alt_text":  "image1",
-				},
+				imageBlock,
 			],
 		} ),
 	} )
