@@ -62,6 +62,8 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	
 	const web = new WebClient( process.env.SLACK_TOKEN )
 	
+	console.log( process.env.SLACK_TOKEN )
+	
 	return web.auth
 		.test()
 		.then( ( res: any ) => {
