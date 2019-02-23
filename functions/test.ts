@@ -59,7 +59,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 			"Content-Type": "application/json",
 		},
 		statusCode: 200,
-		body:       JSON.stringify( imageBlock ),
+		body:       JSON.stringify( { blocks: [ imageBlock ] } ),
 	} )
 }
 
