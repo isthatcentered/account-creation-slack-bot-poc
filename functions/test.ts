@@ -63,8 +63,11 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	const params = event.queryStringParameters,
 	      body   = event.body
 	
-	console.log( body )
-	console.log( JSON.parse( body ) )
+	
+	console.log( "BODY:::", body )
+	console.log( "PARAMS:::", params )
+	console.log( event )
+	
 	
 	const response: HelloResponse = {
 		statusCode: 200,
