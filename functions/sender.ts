@@ -60,7 +60,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	console.log( "PARAMS:::", params )
 	console.log( "BODY:::", body )
 	
-	const web = new WebClient( "xoxp-560384344470-558908103412-559328523333-4ddd8bf7fb71d3542e535206b18f84d6" )
+	const web = new WebClient( process.env.SLACK_TOKEN )
 	
 	return web.auth
 		.test()
