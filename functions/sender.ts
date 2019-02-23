@@ -57,8 +57,8 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	      body: MessageActionRequest = parse( event.body || "" ) as any
 	
 	
-	console.log( "PARAMS:::", params )
-	console.log( "BODY:::", body )
+	// console.log( "PARAMS:::", params )
+	console.log( "REQ_BODY:::", body )
 	
 	const web = new WebClient( process.env.SLACK_TOKEN )
 	
@@ -71,6 +71,9 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 			return res.user_id // Find your user id to know where to send messages to
 		} )
 		.then( id => {
+			
+			console.log( "TRIGGER:::", body.payload.trigger_id )
+			console.log( "BODY_IN:::", body )
 			
 			const promises = [
 				web.chat.postMessage( {
