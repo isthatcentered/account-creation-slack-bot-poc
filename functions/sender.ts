@@ -1,9 +1,12 @@
 import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda"
 import { parse } from "query-string"
 import { WebClient } from "@slack/client"
+import { config } from "dotenv"
 
 
 
+
+config()
 
 export type Maybe<T> = T | null | undefined
 
@@ -18,62 +21,65 @@ interface Response
 
 interface MessageActionRequest
 {
-	payload: {
-		type: string
-		token: string
-		action_ts: string
-		team: {
-			domain: string
-			id: string
-		}
-		user: {
-			name: string
-			id: string
-		}
-		channel: {
-			name: string
-			id: string
-		}
-		callback_id: string
-		trigger_id: string
-		message_ts: string
-		message: {
-			client_msg_id?: string
-			text: string
-			type: string
-			user?: string
-			ts: string
-			username?: string
-			subtype?: string
-			bot_id?: string
-		}
-		response_url: string
+	payload: string
+}
+
+export interface MessageActionRequestPayload
+{
+	type: string
+	token: string
+	action_ts: string
+	team: {
+		domain: string
+		id: string
 	}
+	user: {
+		name: string
+		id: string
+	}
+	channel: {
+		name: string
+		id: string
+	}
+	callback_id: string
+	trigger_id: string
+	message_ts: string
+	message: {
+		client_msg_id?: string
+		text: string
+		type: string
+		user?: string
+		ts: string
+		username?: string
+		subtype?: string
+		bot_id?: string
+	}
+	response_url: string
 }
 
 const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
 	
-	const params                     = event.queryStringParameters,
-	      body: MessageActionRequest = parse( event.body || "" ) as any
 	
+	const params                               = event.queryStringParameters,
+	      { payload }: MessageActionRequest    = parse( event.body || "" ) as any,
+	      message: MessageActionRequestPayload = JSON.parse( payload )
 	
-	// console.log( "PARAMS:::", params )
-	console.log( "REQ_BODY:::", body )
+	console.log( "////////////////////////////////////////" )
+	console.log( "PARSED", message )
+	console.log( "////////////////////////////////////////" )
 	
 	const web = new WebClient( process.env.SLACK_TOKEN )
 	
-	console.log( process.env.SLACK_TOKEN )
 	
 	return web.auth
 		.test()
 		.then( ( res: any ) => {
-			console.log( "RES:::", res )
 			return res.user_id // Find your user id to know where to send messages to
 		} )
 		.then( id => {
-			
-			console.log( "TRIGGER:::", body.payload.trigger_id )
-			console.log( "BODY_IN:::", (body.payload as any).triggerId )
+			console.log( "*********************************************" )
+			console.log( "PAYLOAD:::", message.trigger_id )
+			console.log( "*********************************************" )
 			
 			const promises = [
 				web.chat.postMessage( {
@@ -81,23 +87,41 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 					text:    `The current time is... now ? 🤷‍♂️`,
 				} ),
 				web.dialog.open( {
-					trigger_id: body.payload.trigger_id,
+					trigger_id: message.trigger_id,
 					dialog:     {
 						callback_id:      "ryde-46e2b0",
-						title:            "Request a Ride",
+						title:            `Create account`,
 						submit_label:     "Request",
 						notify_on_cancel: true,
 						state:            "Limo",
 						elements:         [
 							{
-								type:  "text",
-								label: "Pickup Location",
-								name:  "loc_origin",
+								label:   "Tools",
+								type:    "select",
+								name:    "meal_preferences",
+								options: [
+									{
+										label: "Github",
+										value: "hindu",
+									},
+									{
+										label: "Gitlab",
+										value: "vegan",
+									},
+									{
+										label: "Artifactory",
+										value: "kosher",
+									},
+									{
+										label: "Vault",
+										value: "burrito",
+									},
+								],
 							},
 							{
 								type:  "text",
-								label: "Dropoff Location",
-								name:  "loc_destination",
+								label: "Team name",
+								name:  "loc_origin",
 							},
 						],
 					},
@@ -128,95 +152,95 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 		} )
 }
 
-const payload: MessageActionRequest = {
-	payload: {
-		type:         "message_action",
-		token:        "KmDISxAGBBgfNVS3f12ILd2a",
-		action_ts:    "1550919892.981365",
-		team:         {
-			id:     "TGGBAA4DU",
-			domain: "isthatcenteredgroup",
-		},
-		user:         {
-			id:   "UGESQ31C4",
-			name: "e.peninb",
-		},
-		channel:      {
-			id:   "CGEU070CA",
-			name: "factory",
-		},
-		callback_id:  "account_new",
-		trigger_id:   "558921874852.560384344470.10ba386f94dda67100c50da433c85949",
-		message_ts:   "1550918636.000300",
-		message:      {
-			type:     "message",
-			subtype:  "bot_message",
-			text:     "The current time is... now ? :man-shrugging:",
-			ts:       "1550918636.000300",
-			username: "Random",
-			bot_id:   "BGEQKNVNX",
-		},
-		response_url: "https:\\/\\/hooks.slack.com\\/app\\/TGGBAA4DU\\/558217982864\\/uioZZFM70Dm93kXJirK1j3uM",
-	},
-}
-
-const payload2: MessageActionRequest = {
-	payload: {
-		type:         "message_action",
-		token:        "KmDISxAGBBgfNVS3f12ILd2a",
-		action_ts:    "1550924311.855212",
-		team:         {
-			id:     "TGGBAA4DU",
-			domain: "isthatcenteredgroup",
-		},
-		user:         {
-			id:   "UGESQ31C4",
-			name: "e.peninb",
-		},
-		channel:      {
-			id:   "CGEU070CA",
-			name: "factory",
-		},
-		callback_id:  "account_new",
-		trigger_id:   "558941468132.560384344470.3ffaaa71fb62b5f5fd03c1225accaec0",
-		message_ts:   "1550924309.000500",
-		message:      {
-			client_msg_id: "34819af8-f04e-4c56-8f80-96f38a355162",
-			type:          "message",
-			text:          "lmklj",
-			user:          "UGESQ31C4",
-			ts:            "1550924309.000500",
-		},
-		response_url: "https:\\/\\/hooks.slack.com\\/app\\/TGGBAA4DU\\/558985554802\\/iPWhWQI5qrh0BfzZwEkGUL1p",
-	},
-}
-
-
-let t = {
-	"type":            "message_action",
-	"token":           "KmDISxAGBBgfNVS3f12ILd2a",
-	"action_ts":       "1550929511.785663",
-	"team":            {
-		"id":     "TGGBAA4DU",
-		"domain": "isthatcenteredgroup",
-	},
-	"user":            {
-		"id":   "UGESQ31C4",
-		"name": "e.peninb",
-	},
-	"channel":         {
-		"id":   "CGEU070CA",
-		"name": "factory",
-	},
-	"callback_id":     "account_new",
-	"trigger_id":      "558887688883.560384344470.08cd32f99f38b9ebebe91c6a442521bf",
-	"message_ts":      "1550928756.001700",
-	"message":         {
-		"client_msg_id": "e131f68f-dd54-4375-8945-4006040322c3",
-		"type":          "message",
-		"text":          "kuh",
-		"user":          "UGESQ31C4", "ts": "1550928756.001700",
-	}, "response_url": "https:\/\/hooks.slack.com\/app\/TGGBAA4DU\/558965632324\/qW5tATN8hOSjOMdoUB9pHovJ",
-}
+// const payload: MessageActionRequest = {
+// 	payload: {
+// 		type:         "message_action",
+// 		token:        "KmDISxAGBBgfNVS3f12ILd2a",
+// 		action_ts:    "1550919892.981365",
+// 		team:         {
+// 			id:     "TGGBAA4DU",
+// 			domain: "isthatcenteredgroup",
+// 		},
+// 		user:         {
+// 			id:   "UGESQ31C4",
+// 			name: "e.peninb",
+// 		},
+// 		channel:      {
+// 			id:   "CGEU070CA",
+// 			name: "factory",
+// 		},
+// 		callback_id:  "account_new",
+// 		trigger_id:   "558921874852.560384344470.10ba386f94dda67100c50da433c85949",
+// 		message_ts:   "1550918636.000300",
+// 		message:      {
+// 			type:     "message",
+// 			subtype:  "bot_message",
+// 			text:     "The current time is... now ? :man-shrugging:",
+// 			ts:       "1550918636.000300",
+// 			username: "Random",
+// 			bot_id:   "BGEQKNVNX",
+// 		},
+// 		response_url: "https:\\/\\/hooks.slack.com\\/app\\/TGGBAA4DU\\/558217982864\\/uioZZFM70Dm93kXJirK1j3uM",
+// 	},
+// }
+//
+// const payload2: MessageActionRequest = {
+// 	payload: {
+// 		type:         "message_action",
+// 		token:        "KmDISxAGBBgfNVS3f12ILd2a",
+// 		action_ts:    "1550924311.855212",
+// 		team:         {
+// 			id:     "TGGBAA4DU",
+// 			domain: "isthatcenteredgroup",
+// 		},
+// 		user:         {
+// 			id:   "UGESQ31C4",
+// 			name: "e.peninb",
+// 		},
+// 		channel:      {
+// 			id:   "CGEU070CA",
+// 			name: "factory",
+// 		},
+// 		callback_id:  "account_new",
+// 		trigger_id:   "558941468132.560384344470.3ffaaa71fb62b5f5fd03c1225accaec0",
+// 		message_ts:   "1550924309.000500",
+// 		message:      {
+// 			client_msg_id: "34819af8-f04e-4c56-8f80-96f38a355162",
+// 			type:          "message",
+// 			text:          "lmklj",
+// 			user:          "UGESQ31C4",
+// 			ts:            "1550924309.000500",
+// 		},
+// 		response_url: "https:\\/\\/hooks.slack.com\\/app\\/TGGBAA4DU\\/558985554802\\/iPWhWQI5qrh0BfzZwEkGUL1p",
+// 	},
+// }
+//
+//
+// let t = {
+// 	"type":            "message_action",
+// 	"token":           "KmDISxAGBBgfNVS3f12ILd2a",
+// 	"action_ts":       "1550929511.785663",
+// 	"team":            {
+// 		"id":     "TGGBAA4DU",
+// 		"domain": "isthatcenteredgroup",
+// 	},
+// 	"user":            {
+// 		"id":   "UGESQ31C4",
+// 		"name": "e.peninb",
+// 	},
+// 	"channel":         {
+// 		"id":   "CGEU070CA",
+// 		"name": "factory",
+// 	},
+// 	"callback_id":     "account_new",
+// 	"trigger_id":      "558887688883.560384344470.08cd32f99f38b9ebebe91c6a442521bf",
+// 	"message_ts":      "1550928756.001700",
+// 	"message":         {
+// 		"client_msg_id": "e131f68f-dd54-4375-8945-4006040322c3",
+// 		"type":          "message",
+// 		"text":          "kuh",
+// 		"user":          "UGESQ31C4", "ts": "1550928756.001700",
+// 	}, "response_url": "https:\/\/hooks.slack.com\/app\/TGGBAA4DU\/558965632324\/qW5tATN8hOSjOMdoUB9pHovJ",
+// }
 
 export { handler }
