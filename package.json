@@ -22,6 +22,7 @@
     "homepage": "https://github.com/isthatcentered/netlify-functions-hello-world#readme",
     "devDependencies": {
         "@babel/preset-typescript": "^7.3.3",
+        "@slack/client": "^4.9.0",
         "@types/aws-lambda": "^8.10.19",
         "@types/axios": "^0.14.0",
         "@types/query-string": "^6.2.0",
