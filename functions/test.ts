@@ -35,6 +35,22 @@ import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda"
 
 
 
+// token=ofejdTf2assfTdvTYIwl88za
+// team_id=T4R6RCZFA
+// team_domain=adeo-tech-community
+// channel_id=GG4HB63KM
+// channel_name=privategroup
+// user_id=UDVSGT3EW
+// user_name=edouard.penin
+// command=%2Fcongrats
+// text=
+// response_url=https%3A%2F%2Fhooks.slack.com%2Fcommands%2FT4R6RCZFA%2F558793207363%2FO0Rkh7ewtb1gz8QYjhvelzps
+// trigger_id=558167186192.161229441520.3b717ebc8cf4d8d2aa2e0bdc2d930596
+
+interface SlachCommandBody
+{
+
+}
 
 interface HelloResponse
 {
@@ -48,6 +64,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	      body   = event.body
 	
 	console.log( body )
+	console.log( JSON.parse( body ) )
 	
 	const response: HelloResponse = {
 		statusCode: 200,
