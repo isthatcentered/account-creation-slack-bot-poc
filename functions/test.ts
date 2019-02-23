@@ -10,7 +10,7 @@ import { parse } from "query-string"
 
 export type Maybe<T> = T | null | undefined
 
-interface SlachCommand
+interface SlachCommandRequest
 {
 	team_id: string
 	team_domain: string
@@ -24,6 +24,19 @@ interface SlachCommand
 	trigger_id: string
 }
 
+interface ImageBlock
+{
+	type: "image", // The type of block. For an image block, type is always image.
+	image_url: string, // 	The URL of the image to be displayed.
+	alt_text: string // A plain-text summary of the image. This should not contain any markup.
+	title?: {
+		type: "plain_text",
+		text: string
+		emoji?: boolean
+	},
+	block_id?: string,
+}
+
 interface Response
 {
 	headers: { [ key: string ]: string }
@@ -31,34 +44,26 @@ interface Response
 	body: string
 }
 
-interface ImageBlock
-{
-	type: "image", // The type of block. For an image block, type is always image.
-	image_url: string, // 	The URL of the image to be displayed.
-	title: {
-		type: "plain_text",
-		text: string
-		emoji: boolean
-	},
-	block_id?: string,
-	alt_text?: string // A plain-text summary of the image. This should not contain any markup.
-}
+const congrats = [
+	"https://media.giphy.com/media/g9582DNuQppxC/giphy.gif",
+	"https://media.giphy.com/media/3oriO75X3EdbWwBqIo/giphy.gif",
+	"https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
+]
 
-const congrats = [ "https://media.giphy.com/media/g9582DNuQppxC/giphy.gif", "https://media.giphy.com/media/3oriO75X3EdbWwBqIo/giphy.gif", "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif" ]
 const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: Callback ): Promise<Response> => {
 	
-	const params             = event.queryStringParameters,
-	      body: SlachCommand = parse( event.body || "" ) as any
+	const params                    = event.queryStringParameters,
+	      body: SlachCommandRequest = parse( event.body || "" ) as any
 	
 	const imageBlock: ImageBlock = {
-		"type":      "image",
-		"title":     {
-			"type":  "plain_text",
-			"text":  "image1",
-			"emoji": true,
+		type:      "image",
+		title:     {
+			type:  "plain_text",
+			text:  "🥳",
+			emoji: true,
 		},
-		"image_url": "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
-		"alt_text":  "image1",
+		image_url: "https://media.giphy.com/media/bKBM7H63PIykM/giphy.gif",
+		alt_text:  "Congrats",
 	}
 	
 	return Promise.resolve( {
