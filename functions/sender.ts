@@ -60,7 +60,7 @@ const handler: Handler = ( event: APIGatewayEvent, context: Context, callback: C
 	console.log( "PARAMS:::", params )
 	console.log( "BODY:::", body )
 	
-	const web = new WebClient( "xoxp-560384344470-558908103412-558913681364-094288a8b62ce5e2f1a3f8b98ebb684a" )
+	const web = new WebClient( "xoxp-560384344470-558908103412-559328523333-4ddd8bf7fb71d3542e535206b18f84d6" )
 	
 	return web.auth
 		.test()
