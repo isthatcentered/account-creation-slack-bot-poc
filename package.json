@@ -9,7 +9,8 @@
         "functions": "yarn netlify-lambda serve ./functions",
         "build:functions": "yarn netlify-lambda build ./functions",
         "build": "yarn build:functions",
-        "proxy": "ngrok http 9000"
+        "proxy": "ngrok http 9000",
+        "types": "tsc --watch"
     },
     "repository": {
         "type": "git",
