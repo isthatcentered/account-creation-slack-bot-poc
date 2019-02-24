@@ -15,90 +15,35 @@ const handler = ( event: APIGatewayEvent, context: Context, callback: Callback )
 	const action: SlackUserAction<{ tool: string, email: string, team_name: string, slack_user: string }> = _extractFormData( event.body ),
 	      client                                                                                          = new WebClient( process.env.SLACK_TOKEN, { logLevel: LogLevel.DEBUG } )
 	
-	let pending: Promise<unknown>
 	
-	console.log( action )
+	return handleAction()
 	
-	const instantiator = action.user.id
 	
-	switch ( action.type ) {
-		
-		case "message_action":
-			
-			pending = (action.message as botMessageInfos).subtype ?// it's a bot message, we can't create accounts for those
-			          cancel() :
-			          _sendDialog( action )
-			break;
-		
-		case "dialog_submission":
-			const { slack_user: asker, email, team_name, tool } = action.submission
-			
-			const sendCredentialsToUser = client.chat.postMessage( {
-				channel:    asker,
-				// Will only appear in notification as we're using blocks
-				text:       `${tool} account created `,
-				// icon_emoji: ":raised_hands:",
-				blocks:     [
-					{
-						type:      "section",
-						text:      {
-							type: "mrkdwn",
-							text: `Hey ${asker}, your ${tool} account has been created, here are your credentials [++ SEND A POLL ++]`,
-						},
-						accessory: {
-							type:      "image",
-							image_url: "https://media.giphy.com/media/wAxlCmeX1ri1y/giphy.gif",
-							alt_text:  "Victory",
-						},
-					},
-				],
-				// as_user:  true, // I don't receive notifications if i send myself a dm 😅
-				// username: "isthatcentered",
-			} )
-			
-			const sendActionSuccessConfirmationToInstantiator = client.chat.postEphemeral( {
-				channel: action.channel.id,
-				user:    action.user.id,
-				text:    "Success, account has been created and sent",
-			} )
-			
-			// const sendUserInfosToInstantiator = client.users.info( { user: asker } )
-			// 	.then( ( { user }: any ) => client.chat.postMessage( {
-			// 			channel: instantiator,
-			// 			text:    `Here's what we got on this guy: name: ${user.name}`,
-			// 		} ),
-			// 	)
-			
-			pending = Promise.all( [
-				sendCredentialsToUser,
-				sendActionSuccessConfirmationToInstantiator, // yeah yeah this can arrive before but we're faking it so it's ok
-				// sendUserInfosToInstantiator,
-			] )
-			break;
-		
-		default:
-			pending = Promise.resolve()
-			break;
+	// Private helpers
+	function _actionTypeNotHandled()
+	{
+		return [ "message_action", "dialog_submission" ].indexOf( action.type ) < 0
 	}
 	
 	
-	// Is it dialog submit
-	// -> Send me the user's infos (this is for demo)
-	//    -> Find out who triggered the actions
-	//    -> Get his infos
-	//    -> Post message to his id
-	// -> send dm
-	//    -> "Hey dude, your account has bee created"
-	//    -> gif
-	// -> Track creation
-	// Send poll
+	function handleAction()
+	{
+		if ( _actionTypeNotHandled() )
+			return cancel( action )
+		
+		return _getActionHandler( action.type )( action, client )
+	}
 	
 	
-	return pending
-		.then( res => ({
-			statusCode: 200,
-			body:       "",
-		}) )
+	function _getActionHandler( actionType: string )
+	{
+		const handlers: { [ action_type: string ]: actionHandler } = {
+			message_action:    handleUserClickedAccountCreationButton,
+			dialog_submission: handleAccountCreationSubmission,
+		}
+		
+		return handlers[ actionType ]
+	}
 	
 	
 	function _extractFormData( body: Maybe<string> )
@@ -109,13 +54,37 @@ const handler = ( event: APIGatewayEvent, context: Context, callback: Callback )
 	}
 	
 	
-	function cancel(): Promise<any>
+	function cancel( action: UserTriggeredAction ): Promise<Response>
+	{
+		return Promise.resolve( {
+			statusCode: 200,
+			body:       JSON.stringify( { error: { message: `Action [${action.type}] not handled` } } ),
+		} )
+	}
+}
+
+//
+// 😍 Handlers
+function handleUserClickedAccountCreationButton( action: DialogTriggeredAction, client: WebClient ): Promise<Response>
+{
+	return (
+		(action.message as botMessageInfos).subtype ?// it's a bot message, we can't create accounts for those
+		Promise.resolve() :
+		_sendDialog( action )
+	)
+		.then( res => ({
+			statusCode: 200,
+			body:       "",
+		}) )
+	
+	
+	function cancel()
 	{
 		return Promise.resolve()
 	}
 	
 	
-	function _sendDialog( action: DialogTriggeredAction )
+	function _sendDialog( action: DialogTriggeredAction ): Promise<any>
 	{
 		return client.dialog.open( {
 			trigger_id: action.trigger_id,
@@ -178,6 +147,73 @@ const handler = ( event: APIGatewayEvent, context: Context, callback: Callback )
 		
 	}
 }
+
+
+function handleAccountCreationSubmission( action: DialogSubmitedAction<{ tool: string; email: string; team_name: string; slack_user: string }>, client: WebClient ): Promise<Response>
+{
+	// Is it dialog submit
+	// -> Send me the user's infos (this is for demo)
+	//    -> Find out who triggered the actions
+	//    -> Get his infos
+	//    -> Post message to his id
+	// -> send dm
+	//    -> "Hey dude, your account has bee created"
+	//    -> gif
+	// -> Track creation
+	// Send poll
+	
+	const { slack_user: asker, email, team_name, tool } = action.submission,
+	      instantiator                                  = action.user.id
+	
+	const sendCredentialsToUser = client.chat.postMessage( {
+		channel: asker,
+		// Will only appear in notification as we're using blocks
+		text:    `${tool} account created `,
+		// icon_emoji: ":raised_hands:",
+		blocks:  [
+			{
+				type:      "section",
+				text:      {
+					type: "mrkdwn",
+					text: `Hey ${asker}, your ${tool} account has been created, here are your credentials [++ SEND A POLL ++]`,
+				},
+				accessory: {
+					type:      "image",
+					image_url: "https://media.giphy.com/media/wAxlCmeX1ri1y/giphy.gif",
+					alt_text:  "Victory",
+				},
+			},
+		],
+		// as_user:  true, // I don't receive notifications if i send myself a dm 😅
+		// username: "isthatcentered",
+	} )
+	
+	const sendActionSuccessConfirmationToInstantiator = client.chat.postEphemeral( {
+		channel: action.channel.id,
+		user:    action.user.id,
+		text:    "Success, account has been created and sent",
+	} )
+	
+	// const sendUserInfosToInstantiator = client.users.info( { user: asker } )
+	// 	.then( ( { user }: any ) => client.chat.postMessage( {
+	// 			channel: instantiator,
+	// 			text:    `Here's what we got on this guy: name: ${user.name}`,
+	// 		} ),
+	// 	)
+	
+	return Promise.all( [
+			sendCredentialsToUser,
+			sendActionSuccessConfirmationToInstantiator, // yeah yeah this can arrive before but we're faking it so it's ok
+			// sendUserInfosToInstantiator,
+		] )
+		.then( res => ({
+			statusCode: 200,
+			body:       "",
+		}) )
+}
+
+
+export type actionHandler = ( action: any, client: WebClient ) => Promise<Response>
 
 export type SlackUserAction<T> = DialogTriggeredAction | DialogSubmitedAction<T>
 
