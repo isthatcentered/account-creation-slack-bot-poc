@@ -179,10 +179,8 @@ export class CreateDesiredAccount implements EventHandler
 	
 	private _trackInAirtable()
 	{
-		const { email, team_name, tool } = this.__event.submission,
-		      sheet                      = new Airtable( { apiKey: process.env.AIRTABLE_API_KEY } ).base( "appz0LgWqXvt4BkwE" );
-		
-		console.log( "AT:::", process.env.AIRTABLE_API_KEY )
+		const { email, tool } = this.__event.submission,
+		      sheet           = new Airtable( { apiKey: process.env.AIRTABLE_API_KEY } ).base( "appz0LgWqXvt4BkwE" );
 		
 		const record = {
 			Date: new Date( Date.now() ).toISOString(),
@@ -195,8 +193,6 @@ export class CreateDesiredAccount implements EventHandler
 				.create( record, { typecast: true }, function ( err: any, record: any ) {
 					if ( err )
 						reject( err )
-					
-					console.log( "[RECORD:::]", record );
 					
 					resolve( record )
 				} );
