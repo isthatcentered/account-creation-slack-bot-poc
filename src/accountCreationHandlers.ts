@@ -143,9 +143,8 @@ export class CreateDesiredAccount implements EventHandler
 	
 	handle()
 	{
-		return this
-			._sendCredentialsToUser()
-			.then( () => this._trackInAirtable() )
+		return this._trackInAirtable()
+			.then( () => this._sendCredentialsToUser() )
 			.then( () => this._sendSuccessConfirmationToInstantiator() )
 			.then( () => new NullEventHandler().handle() )
 	}
@@ -182,6 +181,8 @@ export class CreateDesiredAccount implements EventHandler
 	{
 		const { email, team_name, tool } = this.__event.submission,
 		      sheet                      = new Airtable( { apiKey: process.env.AIRTABLE_API_KEY } ).base( "appz0LgWqXvt4BkwE" );
+		
+		console.log( "AT:::", process.env.AIRTABLE_API_KEY )
 		
 		const record = {
 			Date: new Date( Date.now() ).toISOString(),
