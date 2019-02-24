@@ -1,5 +1,7 @@
 import { botMessageInfos, EventHandler, Response, userClickedAccountCreationButton, userMessageInfos, userSubmittedDialog } from "./contracts"
 import { WebClient } from "@slack/client"
+//@ts-ignore
+import * as Airtable from "airtable"
 
 
 
@@ -93,7 +95,7 @@ export class RequestUserInformationsForAccountCreation implements EventHandler
 							},
 							{
 								label: "Vault",
-								value: "cault",
+								value: "vault",
 							},
 							{
 								label: "Jira",
@@ -143,6 +145,7 @@ export class CreateDesiredAccount implements EventHandler
 	{
 		return this
 			._sendCredentialsToUser()
+			.then( () => this._trackInAirtable() )
 			.then( () => this._sendSuccessConfirmationToInstantiator() )
 			.then( () => new NullEventHandler().handle() )
 	}
@@ -175,6 +178,31 @@ export class CreateDesiredAccount implements EventHandler
 	}
 	
 	
+	private _trackInAirtable()
+	{
+		const { email, team_name, tool } = this.__event.submission,
+		      sheet                      = new Airtable( { apiKey: process.env.AIRTABLE_API_KEY } ).base( "appz0LgWqXvt4BkwE" );
+		
+		const record = {
+			Date: new Date( Date.now() ).toISOString(),
+			Tool: tool,
+			User: email,
+		}
+		
+		return new Promise( ( resolve, reject ) => {
+			sheet( "Table 1" )
+				.create( record, { typecast: true }, function ( err: any, record: any ) {
+					if ( err )
+						reject( err )
+					
+					console.log( "[RECORD:::]", record );
+					
+					resolve( record )
+				} );
+		} )
+	}
+	
+	
 	private _sendSuccessConfirmationToInstantiator()
 	{
 		const { slack_user: email, tool } = this.__event.submission,
@@ -183,7 +211,7 @@ export class CreateDesiredAccount implements EventHandler
 		return this.__client.chat.postEphemeral( {
 			channel: this.__event.channel.id,
 			user:    instantiator,
-			text:    `Success, ${email} ${tool} account has been created and sent`,
+			text:    `Success, ${email}'s ${tool} account has been created and sent`,
 		} )
 	}
 }

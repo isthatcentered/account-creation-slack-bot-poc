@@ -6,8 +6,8 @@
     "scripts": {
         "start": "yarn functions",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "functions": "yarn netlify-lambda serve ./functions",
-        "build:functions": "yarn netlify-lambda build ./functions",
+        "functions": "yarn netlify-lambda serve ./src/functions",
+        "build:functions": "yarn netlify-lambda build ./src/functions",
         "build": "yarn build:functions",
         "proxy": "ngrok http 9000",
         "types": "tsc --watch"
